@@ -1,0 +1,7 @@
+# dsh-chaos bundle patch: inserts the chaos plugin row into the profile tree.
+# Applied as one bundle layer above the base bundle; later layers (the
+# profile's own cordis.patch.yml, home-level patch, --patch overlays) may
+# address this row by id and replace its whole config.
+- insert:
+    - id: chaos
+      name: '@why-daydream/dsh-chaos'
