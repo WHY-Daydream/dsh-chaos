@@ -10,10 +10,22 @@ Injected failures reuse the same structured codes as real ones (`TOOL_TIMEOUT`, 
 
 ## Install
 
-From a `dsh` installation, add this checkout as a bundle to any profile:
+From a `dsh` installation, install from the npm registry into any profile:
 
 ```sh
-dsh plugin --profile chaos-e2e add .
+dsh plugin --profile web add @why-daydream/dsh-chaos          # latest
+dsh plugin --profile web add @why-daydream/dsh-chaos@0.1.0    # pin a version
+dsh --profile web --dump-config   # confirm `dsh-chaos` appears in the tree
+```
+
+The published package carries a prebuilt `lib/` (via the `dsh.bundle` manifest declaration), so no source build runs on install.
+
+### Development installation (from source)
+
+To iterate against a local checkout, add it with a `link:`/`file:` spec instead:
+
+```sh
+dsh plugin --profile chaos-e2e add /path/to/dsh-chaos
 dsh --profile chaos-e2e --dump-config   # confirm `dsh-chaos` appears in the tree
 ```
 
