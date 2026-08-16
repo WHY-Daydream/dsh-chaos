@@ -10,10 +10,22 @@ English | [中文](README.zh.md)
 
 ## 安装
 
-在 `dsh` 安装中，把本 checkout 作为 bundle 加入任意 profile：
+在 `dsh` 安装中，从 npm registry 安装到任意 profile：
 
 ```sh
-dsh plugin --profile chaos-e2e add .
+dsh plugin --profile web add @why-daydream/dsh-chaos          # latest
+dsh plugin --profile web add @why-daydream/dsh-chaos@0.1.0    # 锁定版本
+dsh --profile web --dump-config   # 确认树中出现 `dsh-chaos`
+```
+
+发布的包自带预构建的 `lib/`（通过 manifest 中的 `dsh.bundle` 声明），安装时无需源码构建。
+
+### 源码安装（开发）
+
+如需基于本地 checkout 迭代，改用 `link:`/`file:` 规格：
+
+```sh
+dsh plugin --profile chaos-e2e add /path/to/dsh-chaos
 dsh --profile chaos-e2e --dump-config   # 确认树中出现 `dsh-chaos`
 ```
 
