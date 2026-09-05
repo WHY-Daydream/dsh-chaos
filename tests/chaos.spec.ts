@@ -8,7 +8,7 @@
 
 import { describe, expect, it } from 'vitest'
 import { Context } from '@deepseek-ai/cordis'
-import { CallId, LlmAdapter, type GenerateOptions, type StreamChunk } from '@deepseek-ai/dsh-llm'
+import { LlmAdapter, type GenerateOptions, type StreamChunk } from '@deepseek-ai/dsh-llm'
 import SystemPrompt from '@deepseek-ai/dsh-system-prompt'
 import LlmRuntime from '@deepseek-ai/dsh-llm'
 import ToolRuntime, { defineContentToolFixture } from '@deepseek-ai/dsh-tools'
@@ -29,6 +29,18 @@ class ScriptedAdapter extends LlmAdapter {
 const STOP_STREAM: StreamChunk[] = [{ type: 'finish', reason: { kind: 'stop' } }]
 
 const testToolSignal = new AbortController().signal
+
+/**
+ * The dsh-llm call-id brand was renamed `CallId` → `ToolCallId` between the
+ * 0.1.0-rc.5 baseline link and 0.1.2-rc.1+ (PCA F2). Resolve whichever the
+ * linked package exports so this suite runs against both eras (test-only).
+ */
+async function brandCallId(id: string): Promise<never> {
+  const llm = (await import('@deepseek-ai/dsh-llm')) as Record<string, unknown>
+  const make = (llm.ToolCallId ?? llm.CallId) as ((s: string) => unknown) | undefined
+  if (typeof make !== 'function') throw new Error('dsh-llm exports neither ToolCallId nor CallId')
+  return make(id) as never
+}
 
 /** Boot the tool registry + the chaos plugin; the caller registers fixtures. */
 async function toolHarness(config: Config = {}): Promise<Context> {
@@ -54,8 +66,8 @@ async function llmHarness(config: Config = {}, script: StreamChunk[] = STOP_STRE
   return ctx
 }
 
-function executeTool(ctx: Context, name = 'probe'): Promise<unknown> {
-  return ctx.tools.execute({ callId: CallId('c1'), name, arguments: {}, signal: testToolSignal })
+async function executeTool(ctx: Context, name = 'probe'): Promise<unknown> {
+  return ctx.tools.execute({ callId: await brandCallId('c1'), name, arguments: {}, signal: testToolSignal })
 }
 
 async function collectLlm(ctx: Context): Promise<StreamChunk[]> {
